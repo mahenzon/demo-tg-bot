@@ -1,3 +1,12 @@
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        case_sensitive=False,
+    )
+
+    bot_token: str
+
+
+settings = Settings()
