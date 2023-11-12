@@ -1,7 +1,10 @@
 import asyncio
 import logging
+from re import Match
 
-from aiogram import Bot
+from magic_filter import RegexpMode
+
+from aiogram import Bot, F
 from aiogram import Dispatcher
 from aiogram import types
 from aiogram.filters import CommandStart, Command
@@ -22,7 +25,7 @@ async def handle_start(message: types.Message):
     )
 
 
-@dp.message(Command("help"))
+@dp.message(Command("help", prefix="!/"))
 async def handle_help(message: types.Message):
     # text = "I'm an echo bot.\nSend me any message!"
     # entity_bold = types.MessageEntity(
@@ -53,7 +56,7 @@ async def handle_help(message: types.Message):
     )
 
 
-@dp.message(Command("code"))
+@dp.message(Command("code", prefix="/!%"))
 async def handle_command_code(message: types.Message):
     text = markdown.text(
         "Here's Python code:",
@@ -81,7 +84,49 @@ async def handle_command_code(message: types.Message):
         ),
         sep="\n",
     )
-    await message.answer(text=text)
+    await message.answer(text=text, parse_mode=ParseMode.MARKDOWN_V2)
+
+
+# @dp.message(is_photo)
+# @dp.message(lambda message: message.photo)
+@dp.message(F.photo, ~F.caption)
+async def handle_photo_wo_caption(message: types.Message):
+    await message.reply("I can't see, sorry. Could you describe it please?")
+
+
+@dp.message(F.photo, F.caption.contains("please"))
+async def handle_photo_with_please_caption(message: types.Message):
+    await message.reply("Don't beg me. I can't see, sorry.")
+
+
+any_media_filter = F.photo | F.video | F.document
+
+
+@dp.message(any_media_filter, ~F.caption)
+# @dp.message(F.photo, F.video, ~F.caption)
+# @dp.message(F.photo | F.video | F.document, ~F.caption)
+async def handle_any_media_wo_caption(message: types.Message):
+    await message.reply("I can't see.")
+
+
+@dp.message(any_media_filter, F.caption)
+async def handle_any_media_w_caption(message: types.Message):
+    await message.reply(f"Smth is on media. Your text: {message.caption!r}")
+
+
+@dp.message(F.from_user.id.in_({42, 3595399}), F.text == "secret")
+async def secret_admin_message(message: types.Message):
+    await message.reply("Hi, admin!")
+
+
+# @dp.message(F.text.regexp(r"(\d+)", mode=RegexpMode.FINDALL).as_("code"))
+# async def handle_code(message: types.Message, code: list[str]):
+#     await message.reply(f"Your code: {code}")
+
+
+@dp.message(F.text.regexp(r"(\d+)", mode=RegexpMode.MATCH).as_("code"))
+async def handle_code(message: types.Message, code: Match[str]):
+    await message.reply(f"Your code: {code.group()}")
 
 
 @dp.message()
@@ -100,15 +145,22 @@ async def echo_message(message: types.Message):
         text="Wait a second...",
         parse_mode=None,
     )
-    if message.text:
-        await message.answer(
-            text=message.text,
-            entities=message.entities,
-            parse_mode=None,
-        )
-        return
+    # if message.text:
+    #     await message.answer(
+    #         text=message.text,
+    #         entities=message.entities,
+    #         parse_mode=None,
+    #     )
+    #     return
     try:
-        await message.send_copy(chat_id=message.chat.id)
+        await message.copy_to(chat_id=message.chat.id)
+        # await message.forward(chat_id=message.chat.id)
+        # await message.bot.forward_message(
+        #     chat_id
+        #     from_chat_id
+        #     message_id
+        # )
+        # await message.send_copy(chat_id=message.chat.id)
     except TypeError:
         await message.reply(text="Something new 🙂")
 
@@ -117,7 +169,8 @@ async def main():
     logging.basicConfig(level=logging.INFO)
     bot = Bot(
         token=settings.bot_token,
-        parse_mode=ParseMode.MARKDOWN_V2,
+        # parse_mode=ParseMode.MARKDOWN_V2,
+        parse_mode=ParseMode.HTML,
     )
     await dp.start_polling(bot)
 
