@@ -1,15 +1,20 @@
 import asyncio
+import csv
+import io
 import logging
 from re import Match
 
+from aiogram.utils.chat_action import ChatActionSender
 from magic_filter import RegexpMode
 
+import aiohttp
 from aiogram import Bot, F
 from aiogram import Dispatcher
 from aiogram import types
+
 from aiogram.filters import CommandStart, Command
 from aiogram.utils import markdown
-from aiogram.enums import ParseMode
+from aiogram.enums import ParseMode, ChatAction
 
 from config import settings
 
@@ -87,11 +92,126 @@ async def handle_command_code(message: types.Message):
     await message.answer(text=text, parse_mode=ParseMode.MARKDOWN_V2)
 
 
+@dp.message(Command("pic"))
+async def handle_command_pic(message: types.Message):
+    await message.bot.send_chat_action(
+        chat_id=message.chat.id,
+        action=ChatAction.UPLOAD_PHOTO,
+    )
+    url = "https://t4.ftcdn.net/jpg/00/97/58/97/360_F_97589769_t45CqXyzjz0KXwoBZT9PRaWGHRk5hQqQ.jpg"
+    # url = "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb"
+    # file_path = "/Users/suren/Downloads/cat-small.jpg"
+    # await message.bot.send_photo()
+    await message.reply_photo(
+        photo=url,
+        # photo=types.FSInputFile(
+        #     path=file_path,
+        #     # filename=
+        # ),
+        # caption="cat small pic",
+    )
+
+
+@dp.message(Command("file"))
+async def handle_command_file(message: types.Message):
+    await message.bot.send_chat_action(
+        chat_id=message.chat.id,
+        # action=ChatAction.TYPING,
+        # action=ChatAction.UPLOAD_PHOTO,
+        action=ChatAction.UPLOAD_DOCUMENT,
+    )
+    file_path = "/Users/suren/Downloads/cat.jpeg"
+    await message.reply_document(
+        document=types.FSInputFile(
+            path=file_path,
+            filename="cat-big-photo.jpeg",
+        ),
+    )
+    # message_sent.document.file_id
+
+
+@dp.message(Command("text"))
+async def send_txt_file(message: types.Message):
+    file = io.StringIO()
+    file.write("Hello, world!\n")
+    file.write("This is a text file.\n")
+    await message.reply_document(
+        document=types.BufferedInputFile(
+            file=file.getvalue().encode("utf-8"),
+            filename="text.txt",
+        ),
+    )
+
+
+@dp.message(Command("csv"))
+async def send_csv_file(message: types.Message):
+    await message.bot.send_chat_action(
+        chat_id=message.chat.id,
+        action=ChatAction.TYPING,
+    )
+    file = io.StringIO()
+    csv_writer = csv.writer(file)
+    csv_writer.writerows(
+        [
+            ["Name", "Age", "City"],
+            ["John Smith", "28", "New York"],
+            ["Jane Doe", "32", "Los Angeles"],
+            ["Mike Johnson", "40", "Chicago"],
+        ]
+    )
+    await message.reply_document(
+        document=types.BufferedInputFile(
+            file=file.getvalue().encode("utf-8"),
+            filename="people.csv",
+        ),
+    )
+
+
+async def send_big_file(message: types.Message):
+    # await asyncio.sleep(7)
+    file = io.BytesIO()
+    url = "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            result_bytes = await response.read()
+
+    file.write(result_bytes)
+    await message.reply_document(
+        document=types.BufferedInputFile(
+            # file=result_bytes,
+            file=file.getvalue(),
+            filename="cat-big-pic.jpeg",
+        ),
+    )
+
+
+@dp.message(Command("pic_file"))
+async def send_pic_file_buffered(message: types.Message):
+    await message.bot.send_chat_action(
+        chat_id=message.chat.id,
+        action=ChatAction.UPLOAD_DOCUMENT,
+    )
+    # action_sender = ChatActionSender(
+    #     bot=message.bot,
+    #     chat_id=message.chat.id,
+    #     action=ChatAction.UPLOAD_DOCUMENT,
+    # )
+    async with ChatActionSender.upload_document(
+        bot=message.bot,
+        chat_id=message.chat.id,
+    ):
+        await send_big_file(message)
+
+
 # @dp.message(is_photo)
 # @dp.message(lambda message: message.photo)
 @dp.message(F.photo, ~F.caption)
 async def handle_photo_wo_caption(message: types.Message):
-    await message.reply("I can't see, sorry. Could you describe it please?")
+    caption = "I can't see, sorry. Could you describe it please?"
+    await message.reply_photo(
+        photo=message.photo[-1].file_id,
+        caption=caption,
+    )
 
 
 @dp.message(F.photo, F.caption.contains("please"))
@@ -106,7 +226,16 @@ any_media_filter = F.photo | F.video | F.document
 # @dp.message(F.photo, F.video, ~F.caption)
 # @dp.message(F.photo | F.video | F.document, ~F.caption)
 async def handle_any_media_wo_caption(message: types.Message):
-    await message.reply("I can't see.")
+    if message.document:
+        await message.reply_document(
+            document=message.document.file_id,
+        )
+    elif message.video:
+        await message.reply_video(
+            video=message.video.file_id,
+        )
+    else:
+        await message.reply("I can't see.")
 
 
 @dp.message(any_media_filter, F.caption)
@@ -152,6 +281,13 @@ async def echo_message(message: types.Message):
     #         parse_mode=None,
     #     )
     #     return
+
+    if message.sticker:
+        await message.bot.send_chat_action(
+            chat_id=message.chat.id,
+            action=ChatAction.CHOOSE_STICKER,
+        )
+        # await asyncio.sleep(2)
     try:
         await message.copy_to(chat_id=message.chat.id)
         # await message.forward(chat_id=message.chat.id)
