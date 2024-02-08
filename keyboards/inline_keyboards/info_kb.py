@@ -1,9 +1,18 @@
+from enum import Enum
+
+from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from .actions_kb import random_num_updated_cb_data
 
-random_num_dice_cb_data = "random_num_dice_cb_data"
-random_num_modal_cb_data = "random_num_modal_cb_data"
+
+class RandomNumAction(Enum):
+    dice = "dice"
+    modal = "modal"
+
+
+class RandomNumCbData(CallbackData, prefix="random_num"):
+    action: RandomNumAction
 
 
 def build_info_kb() -> InlineKeyboardMarkup:
@@ -25,11 +34,11 @@ def build_info_kb() -> InlineKeyboardMarkup:
     )
     btn_random_num = InlineKeyboardButton(
         text="🎲 Random Num",
-        callback_data=random_num_dice_cb_data,
+        callback_data=RandomNumCbData(action=RandomNumAction.dice).pack(),
     )
     btn_random_num_modal = InlineKeyboardButton(
         text="👾 Random Number",
-        callback_data=random_num_modal_cb_data,
+        callback_data=RandomNumCbData(action=RandomNumAction.modal).pack(),
     )
     row_tg = [tg_channel_btn, tg_chat_btn]
     # row_first = [tg_channel_btn]
