@@ -96,3 +96,11 @@ def get_actions_kb() -> ReplyKeyboardMarkup:
         input_field_placeholder="Actions:",
         resize_keyboard=True,
     )
+
+
+def build_yes_or_no_keyboard() -> ReplyKeyboardMarkup:
+    builder = ReplyKeyboardBuilder()
+    builder.button(text="Yes")
+    builder.button(text="No")
+    # builder.adjust(1)
+    return builder.as_markup(resize_keyboard=True)
