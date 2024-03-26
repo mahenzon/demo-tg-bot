@@ -1,0 +1,16 @@
+[tool.poetry]
+package-mode = false
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiogram = "^3.4.1"
+email-validator = "^2.1.1"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
