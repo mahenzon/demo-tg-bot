@@ -21,5 +21,5 @@ async def handle_survey_user_full_name(message: types.Message, state: FSMContext
 @router.message(Survey.full_name)
 async def handle_survey_user_full_name_invalid_content_type(message: types.Message):
     await message.answer(
-        "Sorry, I didn't understand, send your full name as text.",
+        "Sorry, I didn't understand, send your full name as text. /cancel ?",
     )

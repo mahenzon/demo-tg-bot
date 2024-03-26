@@ -10,10 +10,15 @@ router = Router(name=__name__)
 
 async def send_survey_results(message: types.Message, data: dict) -> None:
     text = markdown.text(
-        "Your survey results:",
+        markdown.hunderline("Your survey results:"),
         "",
         markdown.text("Name:", markdown.hbold(data["full_name"])),
         markdown.text("Email:", markdown.hcode(data["email"])),
+        "",
+        markdown.text("Preferred sport:", markdown.hbold(data["sport"])),
+        markdown.text("Q:", markdown.hitalic(data["sport_question"])),
+        markdown.text("A:", markdown.hitalic(data["sport_answer"])),
+        "",
         (
             "Cool, we'll send you our news!"
             if data["newsletter_ok"]

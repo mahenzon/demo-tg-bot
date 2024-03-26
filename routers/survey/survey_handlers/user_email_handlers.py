@@ -31,8 +31,8 @@ async def handle_survey_email_message(
     await state.set_state(Survey.sport)
     await message.answer(
         text=(
-            f"Cool, your email is now {markdown.hcode(email)}."
-            " Which sport would you prefer?"
+            f"Cool, your email is now {markdown.hcode(email)}.\n"
+            "Which sport would you prefer?"
         ),
         reply_markup=build_select_keyboard(KnownSports),
     )

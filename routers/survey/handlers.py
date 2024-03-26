@@ -1,5 +1,5 @@
 from aiogram import Router, types, F
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 
@@ -12,13 +12,13 @@ from .survey_handlers.user_email_handlers import (
 from .survey_handlers.full_name import router as full_name_router
 from .survey_handlers.select_sport_handlers import router as select_sport_router
 
-from .states import Survey
+from .states import Survey, SurveySportDetails
 
 router = Router(name=__name__)
-router.include_router(email_newsletter_router)
-router.include_router(user_email_router)
 router.include_router(full_name_router)
+router.include_router(user_email_router)
 router.include_router(select_sport_router)
+router.include_router(email_newsletter_router)
 
 
 @router.message(
@@ -33,20 +33,19 @@ async def handle_start_survey(message: types.Message, state: FSMContext):
     )
 
 
-@router.message(Command("cancel"), Survey())
-@router.message(F.text.casefold() == "cancel", Survey())
+survey_states = StateFilter(
+    Survey(),
+    SurveySportDetails(),
+)
+
+
+@router.message(Command("cancel"), survey_states)
+@router.message(F.text.casefold() == "cancel", survey_states)
 async def cancel_handler(message: types.Message, state: FSMContext) -> None:
     """
     Allow user to cancel survey
     """
     current_state = await state.get_state()
-    if current_state is None:
-        await message.reply(
-            text="OK, but nothing was going on. Start survey: /survey",
-            reply_markup=types.ReplyKeyboardRemove(),
-        )
-        return
-
     await state.clear()
     await message.answer(
         f"Cancelled survey on step {current_state}. Start again: /survey",
