@@ -15,7 +15,7 @@ from routers import router as main_router
 async def main():
     dp = Dispatcher()
     dp.include_router(main_router)
-    dp.message.middleware(RateLimitMiddleware())
+    dp.message.middleware(RateLimitMiddleware(rate_limit=10))
 
     logging.basicConfig(level=logging.INFO)
     bot = Bot(
