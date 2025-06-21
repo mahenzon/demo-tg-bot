@@ -8,12 +8,14 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from config import settings
+from middlewares.rate_limit_middleware import RateLimitMiddleware
 from routers import router as main_router
 
 
 async def main():
     dp = Dispatcher()
     dp.include_router(main_router)
+    dp.message.middleware(RateLimitMiddleware())
 
     logging.basicConfig(level=logging.INFO)
     bot = Bot(
