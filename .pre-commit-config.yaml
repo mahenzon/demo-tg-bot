@@ -15,6 +15,7 @@ repos:
       - id: uv-lock
       - id: uv-export
         args:
+          - --quiet
           - --no-hashes
           - --frozen
           - --no-header
