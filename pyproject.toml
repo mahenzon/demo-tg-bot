@@ -1,17 +1,22 @@
-[tool.poetry]
-package-mode = false
+[project]
+name = ""
+version = "0.0.1"
+requires-python = ">=3.11"
+dependencies = [
+    "aiogram>=3.22.0,<4",
+    "email-validator>=2.2.0,<3",
+    "pydantic-settings>=2.9.1,<3",
+]
 
 
-[tool.poetry.dependencies]
-python = "^3.11"
-aiogram = "^3.22.0"
-email-validator = "^2.2.0"
-pydantic-settings = "^2.9.1"
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+]
 
-
-[tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
+[tool.uv]
+package = false
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
