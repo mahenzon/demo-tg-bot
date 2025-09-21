@@ -1,6 +1,7 @@
 from re import Match
 
 from aiogram import Router, F, types
+from aiogram.methods import SendMessage
 from aiogram.utils import markdown
 from magic_filter import RegexpMode
 
@@ -11,8 +12,10 @@ router = Router(name=__name__)
 
 
 @router.message(F.from_user.id.in_(settings.admin_ids), F.text == "secret")
-async def secret_admin_message(message: types.Message):
-    await message.reply("Hi, admin!")
+async def secret_admin_message(
+    message: types.Message,
+) -> SendMessage:
+    return message.reply("Hi, admin!")
 
 
 @router.message(
@@ -24,7 +27,7 @@ async def handle_code(
     code: Match[str],
     rate_limit_info: RateLimitInfo,
     # rate_limit_info: RateLimitInfo | None = None,
-):
+) -> SendMessage:
     count = rate_limit_info.message_count
     first_msg = rate_limit_info.first_message
     text = markdown.text(
@@ -33,4 +36,4 @@ async def handle_code(
         f"RL first message: {first_msg}",
         sep="\n",
     )
-    await message.reply(text=text)
+    return message.reply(text=text)

@@ -28,7 +28,9 @@ async def handle_start(message: types.Message) -> SendMessage:
 
 @router.message(F.text == ButtonText.WHATS_NEXT)
 @router.message(Command("help", prefix="!/"))
-async def handle_help(message: types.Message):
+async def handle_help(
+    message: types.Message,
+) -> SendMessage:
     text = markdown.text(
         markdown.markdown_decoration.quote("I'm an {echo} bot."),
         markdown.text(
@@ -43,7 +45,7 @@ async def handle_help(message: types.Message):
         ),
         sep="\n",
     )
-    await message.answer(
+    return message.answer(
         text=text,
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=get_on_help_kb(),
@@ -51,18 +53,22 @@ async def handle_help(message: types.Message):
 
 
 @router.message(Command("more", prefix="!/"))
-async def handle_more(message: types.Message):
+async def handle_more(
+    message: types.Message,
+) -> SendMessage:
     markup = get_actions_kb()
-    await message.answer(
+    return message.answer(
         text="Choose action:",
         reply_markup=markup,
     )
 
 
 @router.message(Command("info", prefix="!/"))
-async def handle_info_command(message: types.Message):
+async def handle_info_command(
+    message: types.Message,
+) -> SendMessage:
     markup = build_info_kb()
-    await message.answer(
+    return message.answer(
         text="Ссылки и прочие ресурсы:",
         reply_markup=markup,
     )

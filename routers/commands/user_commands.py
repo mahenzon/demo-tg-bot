@@ -5,7 +5,7 @@ import aiohttp
 from aiogram import Router, types
 from aiogram.enums import ParseMode, ChatAction
 from aiogram.filters import Command
-from aiogram.methods import SendDocument
+from aiogram.methods import SendDocument, SendMessage, SendPhoto
 from aiogram.utils import markdown
 from aiogram.utils.chat_action import ChatActionSender
 
@@ -16,7 +16,9 @@ router = Router(name=__name__)
 
 
 @router.message(Command("code", prefix="/!%"))
-async def handle_command_code(message: types.Message):
+async def handle_command_code(
+    message: types.Message,
+) -> SendMessage:
     text = markdown.text(
         "Here's Python code:",
         "",
@@ -43,29 +45,33 @@ async def handle_command_code(message: types.Message):
         ),
         sep="\n",
     )
-    await message.answer(text=text, parse_mode=ParseMode.MARKDOWN_V2)
+    return message.answer(text=text, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 @router.message(Command("pic"))
-async def handle_command_pic(message: types.Message):
+async def handle_command_pic(
+    message: types.Message,
+) -> SendPhoto:
     await message.bot.send_chat_action(
         chat_id=message.chat.id,
         action=ChatAction.UPLOAD_PHOTO,
     )
     url = "https://t4.ftcdn.net/jpg/00/97/58/97/360_F_97589769_t45CqXyzjz0KXwoBZT9PRaWGHRk5hQqQ.jpg"
-    await message.reply_photo(
+    return message.reply_photo(
         photo=url,
     )
 
 
 @router.message(Command("file"))
-async def handle_command_file(message: types.Message):
+async def handle_command_file(
+    message: types.Message,
+) -> SendDocument:
     await message.bot.send_chat_action(
         chat_id=message.chat.id,
         action=ChatAction.UPLOAD_DOCUMENT,
     )
     file_path = "/Users/suren/Downloads/cat.jpeg"
-    await message.reply_document(
+    return message.reply_document(
         document=types.FSInputFile(
             path=file_path,
             filename="cat-big-photo.jpeg",
@@ -141,16 +147,20 @@ async def send_pic_file_buffered(message: types.Message) -> SendDocument:
 
 
 @router.message(Command("actions", prefix="!/"))
-async def send_actions_message_w_kb(message: types.Message):
-    await message.answer(
+async def send_actions_message_w_kb(
+    message: types.Message,
+) -> SendMessage:
+    return message.answer(
         text="Your actions:",
         reply_markup=build_actions_kb(),
     )
 
 
 @router.message(Command("shop", prefix="!/"))
-async def send_shop_message_kb(message: types.Message):
-    await message.answer(
+async def send_shop_message_kb(
+    message: types.Message,
+) -> SendMessage:
+    return message.answer(
         text="Your shop actions:",
         reply_markup=build_shop_kb(),
     )

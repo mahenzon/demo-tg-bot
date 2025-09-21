@@ -1,5 +1,6 @@
 from aiogram import Router, F, types
 from aiogram.enums import InputMediaType
+from aiogram.methods import SendMessage, SendVideo, SendDocument
 from aiogram.utils import markdown
 from aiogram.utils.media_group import MediaGroupBuilder
 
@@ -21,7 +22,7 @@ def get_media_file_id(m: types.Message) -> str:
 async def handle_media_group(
     message: types.Message,
     album_messages: list[types.Message] | None = None,
-):
+) -> SendMessage:
     if not album_messages:
         text = markdown.text(
             "Got media",
@@ -33,8 +34,7 @@ async def handle_media_group(
             f"Has media group id: {markdown.hcode(message.media_group_id)}",
             sep="\n",
         )
-        await message.reply(text=text)
-        return
+        return message.reply(text=text)
 
     first_album_message = album_messages[0]
     text = markdown.text(
@@ -68,34 +68,32 @@ async def handle_media_group(
     await first_album_message.reply_media_group(media_group)
 
 
-# @router.message(F.photo, ~F.caption)
-# async def handle_photo_wo_caption(message: types.Message):
-#     caption = "I can't see, sorry. Could you describe it please?"
-#     await message.reply_photo(
-#         photo=message.photo[-1].file_id,
-#         caption=caption,
-#     )
-
-
 @router.message(F.photo, F.caption.contains("please"))
-async def handle_photo_with_please_caption(message: types.Message):
-    await message.reply("Don't beg me. I can't see, sorry.")
+async def handle_photo_with_please_caption(
+    message: types.Message,
+) -> SendMessage:
+    return message.reply("Don't beg me. I can't see, sorry.")
 
 
 @router.message(any_media_filter, ~F.caption)
-async def handle_any_media_wo_caption(message: types.Message):
+async def handle_any_media_wo_caption(
+    message: types.Message,
+) -> SendMessage | SendVideo | SendDocument:
     if message.document:
-        await message.reply_document(
+        return message.reply_document(
             document=message.document.file_id,
         )
-    elif message.video:
-        await message.reply_video(
+
+    if message.video:
+        return message.reply_video(
             video=message.video.file_id,
         )
-    else:
-        await message.reply("I can't see.")
+
+    return message.reply("I can't see.")
 
 
 @router.message(any_media_filter, F.caption)
-async def handle_any_media_w_caption(message: types.Message):
-    await message.reply(f"Smth is on media. Your text: {message.caption!r}")
+async def handle_any_media_w_caption(
+    message: types.Message,
+) -> SendMessage:
+    return message.reply(f"Smth is on media. Your text: {message.caption!r}")

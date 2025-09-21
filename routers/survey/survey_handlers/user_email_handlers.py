@@ -1,5 +1,6 @@
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
+from aiogram.methods import SendMessage
 from aiogram.utils import markdown
 from email_validator import validate_email
 
@@ -26,10 +27,10 @@ async def handle_survey_email_message(
     message: types.Message,
     state: FSMContext,
     email: str,
-):
+) -> SendMessage:
     await state.update_data(email=email)
     await state.set_state(Survey.sport)
-    await message.answer(
+    return message.answer(
         text=(
             f"Cool, your email is now {markdown.hcode(email)}.\n"
             "Which sport would you prefer?"
@@ -39,7 +40,9 @@ async def handle_survey_email_message(
 
 
 @router.message(Survey.email)
-async def handle_survey_invalid_email_message(message: types.Message):
-    await message.answer(
+async def handle_survey_invalid_email_message(
+    message: types.Message,
+) -> SendMessage:
+    return message.answer(
         text="Invalid email, please try again. Cancel survey? Tap /cancel",
     )

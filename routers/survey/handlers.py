@@ -2,6 +2,7 @@ from aiogram import Router, types, F
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
+from aiogram.methods import SendMessage
 
 from .survey_handlers.email_newsletter_handlers import (
     router as email_newsletter_router,
@@ -25,9 +26,12 @@ router.include_router(email_newsletter_router)
     Command("survey", prefix="!/"),
     default_state,
 )
-async def handle_start_survey(message: types.Message, state: FSMContext):
+async def handle_start_survey(
+    message: types.Message,
+    state: FSMContext,
+) -> SendMessage:
     await state.set_state(Survey.full_name)
-    await message.answer(
+    return message.answer(
         "Welcome to our weekly survey! What's your name?",
         reply_markup=types.ReplyKeyboardRemove(),
     )
@@ -41,13 +45,16 @@ survey_states = StateFilter(
 
 @router.message(Command("cancel"), survey_states)
 @router.message(F.text.casefold() == "cancel", survey_states)
-async def cancel_handler(message: types.Message, state: FSMContext) -> None:
+async def cancel_handler(
+    message: types.Message,
+    state: FSMContext,
+) -> SendMessage:
     """
     Allow user to cancel survey
     """
     current_state = await state.get_state()
     await state.clear()
-    await message.answer(
+    return message.answer(
         f"Cancelled survey on step {current_state}. Start again: /survey",
         reply_markup=types.ReplyKeyboardRemove(),
     )

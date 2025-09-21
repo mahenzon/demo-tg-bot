@@ -2,6 +2,7 @@ from aiogram import Router, types, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State
+from aiogram.methods import SendMessage
 
 from keyboards.common_keyboards import build_select_keyboard, build_yes_or_no_keyboard
 from routers.survey.states import (
@@ -39,7 +40,10 @@ known_sport_to_kb: dict = {
     Survey.sport,
     F.text.cast(KnownSports),
 )
-async def select_sport(message: types.Message, state: FSMContext):
+async def select_sport(
+    message: types.Message,
+    state: FSMContext,
+) -> SendMessage:
     next_state, question_text = known_sport_to_next[message.text]
     await state.update_data(
         sport=message.text,
@@ -49,15 +53,17 @@ async def select_sport(message: types.Message, state: FSMContext):
     kb = types.ReplyKeyboardRemove()
     if message.text in known_sport_to_kb:
         kb = known_sport_to_kb[message.text]
-    await message.answer(
+    return message.answer(
         text=question_text,
         reply_markup=kb,
     )
 
 
 @router.message(Survey.sport)
-async def select_sport_invalid_choice(message: types.Message):
-    await message.answer(
+async def select_sport_invalid_choice(
+    message: types.Message,
+) -> SendMessage:
+    return message.answer(
         "Unknown sport, please select one of the following:",
         reply_markup=build_select_keyboard(KnownSports),
     )
@@ -77,10 +83,10 @@ async def select_sport_invalid_choice(message: types.Message):
 async def handle_selected_sport_details_option(
     message: types.Message,
     state: FSMContext,
-):
+) -> SendMessage:
     await state.update_data(sport_answer=message.text)
     await state.set_state(Survey.email_newsletter)
-    await message.answer(
+    return message.answer(
         text=(
             "Would you like to be notified about this sport? Email newsletter.\n"
             "This is last step, but you can /cancel any time."
@@ -90,18 +96,24 @@ async def handle_selected_sport_details_option(
 
 
 @router.message(SurveySportDetails.tennis)
-async def handle_tennis_player_not_text(message: types.Message):
-    await message.answer(text="Please name tennis player using text.")
+async def handle_tennis_player_not_text(
+    message: types.Message,
+) -> SendMessage:
+    return message.answer(text="Please name tennis player using text.")
 
 
 @router.message(SurveySportDetails.football)
-async def handle_football_team_not_text(message: types.Message):
-    await message.answer(text="Please name football team using text.")
+async def handle_football_team_not_text(
+    message: types.Message,
+) -> SendMessage:
+    return message.answer(text="Please name football team using text.")
 
 
 @router.message(SurveySportDetails.formula_one)
-async def handle_formula_one_not_one_of_tracks(message: types.Message):
-    await message.answer(
+async def handle_formula_one_not_one_of_tracks(
+    message: types.Message,
+) -> SendMessage:
+    return message.answer(
         text="Please select one of known F1 tracks:",
         reply_markup=known_f1_tracks_kb,
     )
