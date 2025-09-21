@@ -8,6 +8,7 @@ async def main():
     dp = create_dispatcher()
 
     bot = create_bot()
+    await bot.delete_webhook(drop_pending_updates=False)
     await dp.start_polling(bot)
 
 
