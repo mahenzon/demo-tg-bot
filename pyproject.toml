@@ -4,7 +4,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-aiogram = "^3.20.0.post0"
+aiogram = "^3.22.0"
 email-validator = "^2.2.0"
 pydantic-settings = "^2.9.1"
 
