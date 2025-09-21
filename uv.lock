@@ -27,7 +27,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "black", specifier = ">=25.0.0" },
+    { name = "black", specifier = ">=25.1.0" },
     { name = "pre-commit", specifier = ">=4.3.0" },
 ]
 
