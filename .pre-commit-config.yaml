@@ -13,3 +13,11 @@ repos:
     rev: 0.8.19
     hooks:
       - id: uv-lock
+      - id: uv-export
+        args:
+          - --no-hashes
+          - --frozen
+          - --no-header
+          - --no-annotate
+          - --no-default-groups
+          - --output-file=requirements.txt
