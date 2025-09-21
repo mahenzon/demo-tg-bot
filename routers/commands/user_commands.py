@@ -5,6 +5,7 @@ import aiohttp
 from aiogram import Router, types
 from aiogram.enums import ParseMode, ChatAction
 from aiogram.filters import Command
+from aiogram.methods import SendDocument
 from aiogram.utils import markdown
 from aiogram.utils.chat_action import ChatActionSender
 
@@ -73,11 +74,11 @@ async def handle_command_file(message: types.Message):
 
 
 @router.message(Command("text"))
-async def send_txt_file(message: types.Message):
+async def send_txt_file(message: types.Message) -> SendDocument:
     file = io.StringIO()
     file.write("Hello, world!\n")
     file.write("This is a text file.\n")
-    await message.reply_document(
+    return message.reply_document(
         document=types.BufferedInputFile(
             file=file.getvalue().encode("utf-8"),
             filename="text.txt",
@@ -86,7 +87,7 @@ async def send_txt_file(message: types.Message):
 
 
 @router.message(Command("csv"))
-async def send_csv_file(message: types.Message):
+async def send_csv_file(message: types.Message) -> SendDocument:
     await message.bot.send_chat_action(
         chat_id=message.chat.id,
         action=ChatAction.TYPING,
@@ -101,7 +102,7 @@ async def send_csv_file(message: types.Message):
             ["Mike Johnson", "40", "Chicago"],
         ]
     )
-    await message.reply_document(
+    return message.reply_document(
         document=types.BufferedInputFile(
             file=file.getvalue().encode("utf-8"),
             filename="people.csv",
@@ -109,15 +110,16 @@ async def send_csv_file(message: types.Message):
     )
 
 
-async def send_big_file(message: types.Message):
+async def send_big_file(message: types.Message) -> SendDocument:
     file = io.BytesIO()
     url = "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb"
+    # url = "https://static.vecteezy.com/system/resources/thumbnails/002/098/203/small/silver-tabby-cat-sitting-on-green-background-free-photo.jpg"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             result_bytes = await response.read()
 
     file.write(result_bytes)
-    await message.reply_document(
+    return message.reply_document(
         document=types.BufferedInputFile(
             file=file.getvalue(),
             filename="cat-big-pic.jpeg",
@@ -126,7 +128,7 @@ async def send_big_file(message: types.Message):
 
 
 @router.message(Command("pic_file"))
-async def send_pic_file_buffered(message: types.Message):
+async def send_pic_file_buffered(message: types.Message) -> SendDocument:
     await message.bot.send_chat_action(
         chat_id=message.chat.id,
         action=ChatAction.UPLOAD_DOCUMENT,
@@ -135,7 +137,7 @@ async def send_pic_file_buffered(message: types.Message):
         bot=message.bot,
         chat_id=message.chat.id,
     ):
-        await send_big_file(message)
+        return await send_big_file(message)
 
 
 @router.message(Command("actions", prefix="!/"))

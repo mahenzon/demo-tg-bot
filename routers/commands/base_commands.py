@@ -1,6 +1,7 @@
 from aiogram import F, Router, types
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
+from aiogram.methods import SendMessage
 from aiogram.utils import markdown
 
 from keyboards.common_keyboards import (
@@ -15,10 +16,10 @@ router = Router(name=__name__)
 
 
 @router.message(CommandStart())
-async def handle_start(message: types.Message):
+async def handle_start(message: types.Message) -> SendMessage:
     url = "https://w7.pngwing.com/pngs/547/380/png-transparent-robot-waving-hand-bot-ai-robot-thumbnail.png"
 
-    await message.answer(
+    return message.answer(
         text=f"{markdown.hide_link(url)}Hello, {markdown.hbold(message.from_user.full_name)}!",
         parse_mode=ParseMode.HTML,
         reply_markup=get_on_start_kb(),
