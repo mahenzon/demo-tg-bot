@@ -5,7 +5,6 @@ requires-python = ">=3.11"
 dependencies = [
     "aiogram>=3.22.0,<4",
     "email-validator>=2.2.0,<3",
-    "httpx>=0.28.1",
     "pydantic-settings>=2.9.1,<3",
 ]
 
