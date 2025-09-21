@@ -65,7 +65,7 @@ class YCRequestHandler(SimpleRequestHandler):
         self,
         event: "EventType",
     ):
-        secret_token = event["headers"].get(self.SECRET_TOKEN_HEADER)
+        secret_token = event["headers"].get(self.SECRET_TOKEN_HEADER) or ""
 
         if not self.verify_secret(secret_token, self.bot):
             return {
